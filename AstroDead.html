@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AstroDead</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+        body {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            background: url('https://images.unsplash.com/photo-1447433865958-f402f562b843') no-repeat center center fixed;
+            background-size: cover;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-top: 20px;
+            text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.8);
+        }
+        p {
+            font-size: 1.2rem;
+        }
+        #game-container {
+            position: relative;
+            width: 80vw;
+            height: 60vh;
+            margin: auto;
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            border-radius: 15px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .asteroid {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: url('https://cdn.pixabay.com/photo/2013/07/13/10/07/asteroid-156201_960_720.png') no-repeat center center;
+            background-size: cover;
+            border: none;
+            cursor: pointer;
+            animation: float 3s infinite alternate ease-in-out;
+            transition: transform 0.2s;
+        }
+        .asteroid:hover {
+            transform: scale(1.2);
+        }
+        @keyframes float {
+            from { transform: translateY(0px); }
+            to { transform: translateY(10px); }
+        }
+        .explosion {
+            background: url('https://i.gifer.com/7efs.gif') no-repeat center center;
+            background-size: cover;
+            width: 60px;
+            height: 60px;
+            animation: explode 0.3s ease-out;
+        }
+        @keyframes explode {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.5); opacity: 0; }
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #00a8ff, #0097e6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            box-shadow: 0 0 10px rgba(0, 168, 255, 0.5);
+            font-weight: bold;
+        }
+        button:hover {
+            background: linear-gradient(45deg, #0097e6, #00a8ff);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 168, 255, 0.7);
+        }
+        #timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: yellow;
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse {
+            from { transform: scale(1); color: yellow; }
+            to { transform: scale(1.2); color: red; }
+        }
+    </style>
+</head>
+<body>
+    <audio id="bg-music" loop>
+        <source src="https://cdn.pixabay.com/download/audio/2023/03/28/audio_24a6b2bb78.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="explosion-sound">
+        <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2ad78e544b.mp3" type="audio/mpeg">
+    </audio>
+    
+    <h1>AstroDead</h1>
+    <p>Time Left: <span id="timer">120</span> seconds</p>
+    <p>Asteroids Destroyed: <span id="score">0</span></p>
+    <button onclick="startGame()">Start Game</button>
+    <div id="game-container"></div>
+    
+    <script>
+        let timeLeft = 120;
+        let timer;
+        let asteroids = [];
+        let score = 0;
+        let music = document.getElementById("bg-music");
+        let explosionSound = document.getElementById("explosion-sound");
+
+        function startGame() {
+            document.getElementById("game-container").innerHTML = "";
+            asteroids = [];
+            timeLeft = 120;
+            score = 0;
+            document.getElementById("timer").textContent = timeLeft;
+            document.getElementById("score").textContent = score;
+            music.play();
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = timeLeft;
+                document.getElementById("timer").style.transform = 'scale(1.3)';
+                setTimeout(() => document.getElementById("timer").style.transform = 'scale(1)', 200);
+                createAsteroid();
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function createAsteroid() {
+            let asteroid = document.createElement("button");
+            asteroid.classList.add("asteroid");
+            asteroid.style.left = Math.random() * 80 + "%";
+            asteroid.style.top = Math.random() * 60 + "%";
+            asteroid.onclick = function() {
+                explosionSound.currentTime = 0;
+                explosionSound.play();
+                asteroid.classList.add("explosion");
+                setTimeout(() => asteroid.remove(), 300);
+                asteroids.splice(asteroids.indexOf(asteroid), 1);
+                score++;
+                document.getElementById("score").textContent = score;
+            };
+            document.getElementById("game-container").appendChild(asteroid);
+            asteroids.push(asteroid);
+        }
+
+        function endGame() {
+            clearInterval(timer);
+            music.pause();
+            music.currentTime = 0;
+            alert(`🚀 Time's Up! You destroyed ${score} asteroids!`);
+        }
+    </script>
+</body>
+</html>
+
